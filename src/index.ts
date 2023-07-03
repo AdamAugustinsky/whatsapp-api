@@ -1,7 +1,21 @@
-import { ChatId, Client, create, ev } from "@open-wa/wa-automate";
+import {
+  ChatId,
+  Client,
+  create,
+  ev,
+  NotificationLanguage,
+} from "@open-wa/wa-automate";
 import Fastify from "fastify";
 
-create().then(async (client) => await start(client));
+create({
+  sessionId: "WPPBOT",
+  blockCrashLogs: true,
+  disableSpins: true,
+  headless: true,
+  hostNotificationLang: NotificationLanguage.PTBR,
+  logConsole: false,
+  qrTimeout: 0, //0 means it will wait forever for you to scan the qr code
+}).then(async (client) => await start(client));
 
 ev.on("sessionData.**", async (sessionData, sessionId) => {
   console.log("session", sessionId, sessionData);
@@ -52,7 +66,10 @@ async function start(client: Client) {
   );
 
   fastify.listen(
-    { port: process.env.PORT ? Number(process.env.PORT) : 3000 },
+    {
+      port: process.env.PORT ? Number(process.env.PORT) : 3000,
+      host: "0.0.0.0",
+    },
     (err, address) => {
       if (err) throw err;
       console.log(`Server is now listening on ${address}`);
