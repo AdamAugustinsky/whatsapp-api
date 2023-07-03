@@ -1,7 +1,7 @@
 import { ChatId, Client, create, ev } from "@open-wa/wa-automate";
 import Fastify from "fastify";
 
-create().then((client) => start(client));
+create().then(async (client) => await start(client));
 
 ev.on("sessionData.**", async (sessionData, sessionId) => {
   console.log("session", sessionId, sessionData);
