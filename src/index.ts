@@ -29,6 +29,8 @@ async function start() {
   async function runApi(client: Client) {
     const app = express();
 
+    app.use(express.json());
+
     app.get("/", (_, res) => {
       res.send("Hello World!");
     });
