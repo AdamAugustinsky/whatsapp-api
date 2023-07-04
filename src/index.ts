@@ -5,7 +5,7 @@ import {
   ev,
   NotificationLanguage,
 } from "@open-wa/wa-automate";
-import Fastify from "fastify";
+import express from "express";
 
 async function start() {
   create({
@@ -27,55 +27,32 @@ async function start() {
   });
 
   async function runApi(client: Client) {
-    const fastify = Fastify({
-      logger: true,
+    const app = express();
+
+    app.get("/", (_, res) => {
+      res.send("Hello World!");
     });
 
-    fastify.get("/", (_, reply) => {
-      reply.send({ hello: "world" });
+    app.post("/send-message", async (req, res) => {
+      const body = req.body as { id: ChatId; message: string };
+
+      const wppRes = await client.sendText(body.id, body.message);
+
+      console.log("reply", {
+        status: true,
+        response: wppRes,
+      });
+
+      res.send({
+        status: true,
+        response: wppRes,
+      });
     });
 
-    fastify.post(
-      "/send-message",
-      {
-        schema: {
-          body: {
-            type: "object",
-            properties: {
-              id: { type: "string" },
-              message: { type: "string" },
-            },
-            required: ["id", "message"],
-          },
-        },
-      },
-      async (request, reply) => {
-        const body = request.body as { id: ChatId; message: string };
-
-        const res = await client.sendText(body.id, body.message);
-
-        console.log("reply", {
-          status: true,
-          response: res,
-        });
-
-        reply.send({
-          status: true,
-          response: res,
-        });
-      }
-    );
-
-    fastify.listen(
-      {
-        port: process.env.PORT ? Number(process.env.PORT) : 3000,
-        host: "0.0.0.0",
-      },
-      (err, address) => {
-        if (err) throw err;
-        console.log(`Server is now listening on ${address}`);
-      }
-    );
+    const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+    app.listen(port, () => {
+      console.log(`Server is now listening on ${port}`);
+    });
   }
 }
 
